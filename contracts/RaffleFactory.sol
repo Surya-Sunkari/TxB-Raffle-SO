@@ -11,7 +11,7 @@ error InsufficientLINKBalance();
 error InsufficientLINKAllowance();
 
 contract RaffleFactory is Ownable {
-    address internal supraAddress =
+    address public supraAddress =
         address(0xE1Ac002c6149585a6f499e6C2A03f15491Cb0D04); //Initialized to Ethereum Goerli Testnet
 
     event RaffleCreated(

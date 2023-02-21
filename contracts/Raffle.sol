@@ -19,6 +19,7 @@ error WinnerAlreadyChosen();
 error OnlyNFTOwnerCanAccess();
 error NoBalance();
 error TooShort();
+error OnlySupraOracles();
 
 interface ISupraRouter {
     function generateRequest(
@@ -36,7 +37,6 @@ interface ISupraRouter {
 }
 
 contract Raffle is Ownable {
-    ISupraRouter internal supraRouter;
     // Raffle Content
     address payable public nftOwner;
     uint256 public immutable ticketFee;
@@ -47,6 +47,8 @@ contract Raffle is Ownable {
     address payable winner;
 
     //SupraOracles Content
+    ISupraRouter internal supraRouter;
+    address supraAddress = address(0xE1Ac002c6149585a6f499e6C2A03f15491Cb0D04); //Initialized to ETH Goerli
     uint256 internal randomNumber = type(uint256).max;
     bool public randomNumberRequested;
 
@@ -155,11 +157,16 @@ contract Raffle is Ownable {
         emit RaffleRefunded(msg.sender, _numTickets);
     }
 
-    //call VRF function; randomRequested = true;
+    function requestRandomNumber(uint8 _rngCount) public {
+        supraRouter.generateRequest("disbursement(uint256, uint256[])", 1, 1);
+        randomNumberRequested = true;
+    }
 
-    //receive random number; VRF number -> uint randomNumber; require(msg.sender == supraAddress)
+    function disbursement(uint256 _nonce, uint256[] memory _rngList) external {
+        if (msg.sender != supraAddress) {
+            revert OnlySupraOracles();
+        }
 
-    function disbursement() external nftHeld enoughTickets {
         if (randomNumber == type(uint).max) {
             revert RandomNumberStillLoading();
         }
@@ -171,8 +178,7 @@ contract Raffle is Ownable {
         if (address(this).balance == 0) {
             revert NoBalance();
         }
-
-        winner = payable(players[randomNumber % players.length]);
+        winner = players[_rngList[0] % players.length];
         payable(nftOwner).transfer((address(this).balance * 975) / 1000);
         IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);
         payable(owner()).transfer((address(this).balance)); // 2.5% commission of ticket fees
