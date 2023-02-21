@@ -12,7 +12,6 @@ error InsufficientLINKAllowance();
 
 // INITIALIZED TO GOERLI - NOT STANDARDIZED
 contract RaffleFactory is Ownable {
-
     event RaffleCreated(
         address indexed raffle,
         address indexed nftOwner,
@@ -22,8 +21,7 @@ contract RaffleFactory is Ownable {
         uint256 minTickets
     );
 
-    constructor() Ownable() {
-    }
+    constructor() Ownable() {}
 
     function createRaffle(
         address _nftContract,
@@ -53,14 +51,14 @@ contract RaffleFactory is Ownable {
             _minTickets
         );
 
-    //     if (linkToken.allowance(msg.sender, address(this)) < fee) {
-    //         revert InsufficientLINKAllowance();
-    //     }
+        //     if (linkToken.allowance(msg.sender, address(this)) < fee) {
+        //         revert InsufficientLINKAllowance();
+        //     }
 
-    //     if (linkToken.balanceOf(msg.sender) < fee) {
-    //         revert InsufficientLINKBalance();
-    //     }
-    // }
+        //     if (linkToken.balanceOf(msg.sender) < fee) {
+        //         revert InsufficientLINKBalance();
+        //     }
+    }
 
     function ownerWithdraw() public onlyOwner {
         payable(owner()).transfer(address(this).balance);
