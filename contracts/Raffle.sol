@@ -134,8 +134,7 @@ contract Raffle is Ownable {
         emit RaffleEntered(msg.sender, _numTickets);
     }
 
-    function exitRaffle(uint256 _numTickets) external nftHeld {
-        //vrfCalled
+    function exitRaffle(uint256 _numTickets) external nftHeld vrfCalled {
         if (playerTickets[msg.sender] < _numTickets) {
             revert InsufficientTicketsBought();
         }
@@ -183,7 +182,8 @@ contract Raffle is Ownable {
         if (address(this).balance == 0) {
             revert NoBalance();
         }
-        winner = players[_rngList[0] % players.length];
+        randomNumber = _rngList[0];
+        winner = players[randomNumber % players.length];
         payable(nftOwner).transfer((address(this).balance * 975) / 1000);
         IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);
         payable(owner()).transfer((address(this).balance)); // 2.5% commission of ticket fees
