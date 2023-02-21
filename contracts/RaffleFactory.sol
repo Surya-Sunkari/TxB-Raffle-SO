@@ -10,8 +10,10 @@ error InvalidAmount();
 error InsufficientLINKBalance();
 error InsufficientLINKAllowance();
 
-// INITIALIZED TO GOERLI - NOT STANDARDIZED
 contract RaffleFactory is Ownable {
+    address internal supraAddress =
+        address(0xE1Ac002c6149585a6f499e6C2A03f15491Cb0D04); //Initialized to Ethereum Goerli Testnet
+
     event RaffleCreated(
         address indexed raffle,
         address indexed nftOwner,
@@ -40,7 +42,8 @@ contract RaffleFactory is Ownable {
             _endTime,
             _minTickets,
             _nftContract,
-            _nftID
+            _nftID,
+            supraAddress
         );
         emit RaffleCreated(
             address(raffle),

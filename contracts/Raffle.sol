@@ -20,7 +20,23 @@ error OnlyNFTOwnerCanAccess();
 error NoBalance();
 error TooShort();
 
+interface ISupraRouter {
+    function generateRequest(
+        string memory _functionSig,
+        uint8 _rngCount,
+        uint256 _numConfirmations
+    ) external returns (uint256);
+
+    function generateRequest(
+        string memory _functionSig,
+        uint8 _rngCount,
+        uint256 _numConfirmations,
+        uint256 _clientSeed
+    ) external returns (uint256);
+}
+
 contract Raffle is Ownable {
+    ISupraRouter internal supraRouter;
     // Raffle Content
     address payable public nftOwner;
     uint256 public immutable ticketFee;
@@ -30,7 +46,7 @@ contract Raffle is Ownable {
     uint256 public immutable nftID;
     address payable winner;
 
-    // Oracle Content
+    //SupraOracles Content
     uint256 internal randomNumber = type(uint256).max;
     bool public randomNumberRequested;
 
@@ -49,7 +65,8 @@ contract Raffle is Ownable {
         uint256 _endTime,
         uint256 _minTickets,
         address _nftContract,
-        uint256 _nftID
+        uint256 _nftID,
+        address _supraAddress
     ) Ownable() {
         nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
@@ -57,6 +74,7 @@ contract Raffle is Ownable {
         minTickets = _minTickets;
         nftContract = _nftContract;
         nftID = _nftID;
+        supraRouter = ISupraRouter(_supraAddress);
     }
 
     // Only the owner of the raffle can access this function.
@@ -114,7 +132,8 @@ contract Raffle is Ownable {
         emit RaffleEntered(msg.sender, _numTickets);
     }
 
-    function exitRaffle(uint256 _numTickets) external nftHeld vrfCalled {
+    function exitRaffle(uint256 _numTickets) external nftHeld {
+        //vrfCalled
         if (playerTickets[msg.sender] < _numTickets) {
             revert InsufficientTicketsBought();
         }
@@ -136,6 +155,10 @@ contract Raffle is Ownable {
         emit RaffleRefunded(msg.sender, _numTickets);
     }
 
+    //call VRF function; randomRequested = true;
+
+    //receive random number; VRF number -> uint randomNumber; require(msg.sender == supraAddress)
+
     function disbursement() external nftHeld enoughTickets {
         if (randomNumber == type(uint).max) {
             revert RandomNumberStillLoading();
@@ -156,7 +179,8 @@ contract Raffle is Ownable {
         emit RaffleWinner(winner);
     }
 
-    function deleteRaffle() external onlynftOwner nftHeld vrfCalled {
+    function deleteRaffle() external onlynftOwner nftHeld {
+        //vrfCalled
         IERC721(nftContract).safeTransferFrom(address(this), msg.sender, nftID);
 
         for (uint256 i = players.length - 1; i >= 0; i--) {
