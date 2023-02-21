@@ -5,8 +5,6 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
 // Custom Errors
 error InsufficientAmount();
@@ -22,7 +20,7 @@ error OnlyNFTOwnerCanAccess();
 error NoBalance();
 error TooShort();
 
-contract Raffle is Ownable, VRFConsumerBase {
+contract Raffle is Ownable {
     // Raffle Content
     address payable public nftOwner;
     uint256 public immutable ticketFee;
@@ -32,11 +30,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     uint256 public immutable nftID;
     address payable winner;
 
-    // Chainlink Content
-    bytes32 internal keyHash;
-    uint256 internal fee;
-    address internal vrfCoordinator;
-    address internal linkToken;
+    // Oracle Content
     uint256 internal randomNumber = type(uint256).max;
     bool public randomNumberRequested;
 
@@ -55,18 +49,14 @@ contract Raffle is Ownable, VRFConsumerBase {
         uint256 _endTime,
         uint256 _minTickets,
         address _nftContract,
-        uint256 _nftID,
-        bytes32 _keyHash,
-        uint256 _fee
-    ) Ownable() VRFConsumerBase(vrfCoordinator, linkToken) {
+        uint256 _nftID
+    ) Ownable() {
         nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
         endTime = _endTime;
         minTickets = _minTickets;
         nftContract = _nftContract;
         nftID = _nftID;
-        keyHash = _keyHash;
-        fee = _fee;
     }
 
     // Only the owner of the raffle can access this function.
@@ -144,24 +134,6 @@ contract Raffle is Ownable, VRFConsumerBase {
         }
 
         emit RaffleRefunded(msg.sender, _numTickets);
-    }
-
-    function receiveRandomWinner()
-        external
-        enoughTickets
-        vrfCalled
-        returns (bytes32 requestId)
-    {
-        randomNumberRequested = true;
-
-        return requestRandomness(keyHash, fee);
-    }
-
-    function fulfillRandomness(
-        bytes32 requestId,
-        uint256 randomness
-    ) internal override enoughTickets {
-        randomNumber = randomness;
     }
 
     function disbursement() external nftHeld enoughTickets {
