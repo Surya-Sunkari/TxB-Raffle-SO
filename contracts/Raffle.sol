@@ -157,12 +157,17 @@ contract Raffle is Ownable {
         emit RaffleRefunded(msg.sender, _numTickets);
     }
 
-    function requestRandomNumber(uint8 _rngCount) public {
+    function requestRandomNumber(
+        uint8 _rngCount
+    ) public nftHeld enoughTickets vrfCalled {
         supraRouter.generateRequest("disbursement(uint256, uint256[])", 1, 1);
         randomNumberRequested = true;
     }
 
-    function disbursement(uint256 _nonce, uint256[] memory _rngList) external {
+    function disbursement(
+        uint256 _nonce,
+        uint256[] memory _rngList
+    ) external nftHeld enoughTickets {
         if (msg.sender != supraAddress) {
             revert OnlySupraOracles();
         }
@@ -185,8 +190,7 @@ contract Raffle is Ownable {
         emit RaffleWinner(winner);
     }
 
-    function deleteRaffle() external onlynftOwner nftHeld {
-        //vrfCalled
+    function deleteRaffle() external onlynftOwner nftHeld vrfCalled {
         IERC721(nftContract).safeTransferFrom(address(this), msg.sender, nftID);
 
         for (uint256 i = players.length - 1; i >= 0; i--) {
