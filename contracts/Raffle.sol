@@ -99,8 +99,8 @@ contract Raffle is Ownable {
     modifier vrfCalled() {
         if (randomNumberRequested == true) {
             revert WinnerAlreadyChosen();
-            _;
         }
+        _;
     }
 
     // Function only executes if minimum ticket threshold is met
