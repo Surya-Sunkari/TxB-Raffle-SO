@@ -2,7 +2,7 @@
 
 TxB Raffle is an NFT raffling application with ticket purchase/refund and prize disbursement capabilities; random winner selection is ensured via verifiable random functions (VRFs).
 
-**This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's engineering cohort at UT Austin).**
+**This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's Engineering Cohort at UT Austin).**
 
 # Key Features
 
