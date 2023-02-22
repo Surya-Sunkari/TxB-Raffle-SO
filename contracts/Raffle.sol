@@ -49,8 +49,9 @@ contract Raffle is Ownable {
     //SupraOracles Content
     ISupraRouter internal supraRouter;
     address supraAddress = address(0xE1Ac002c6149585a6f499e6C2A03f15491Cb0D04); //Initialized to ETH Goerli
-    uint256 internal randomNumber = type(uint256).max;
+    uint256 internal randomNumber;
     bool public randomNumberRequested;
+    bool public randomNumberLoaded;
 
     // Player Content
     address payable[] public players;
@@ -169,14 +170,6 @@ contract Raffle is Ownable {
     ) external nftHeld enoughTickets {
         if (msg.sender != supraAddress) {
             revert OnlySupraOracles();
-        }
-
-        if (randomNumber == type(uint).max) {
-            revert RandomNumberStillLoading();
-        }
-
-        if (randomNumberRequested != true) {
-            revert RaffleOngoing();
         }
 
         if (address(this).balance == 0) {
