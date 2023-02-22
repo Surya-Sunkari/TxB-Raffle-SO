@@ -51,7 +51,6 @@ contract Raffle is Ownable {
     address supraAddress = address(0xE1Ac002c6149585a6f499e6C2A03f15491Cb0D04); //Initialized to ETH Goerli
     uint256 internal randomNumber;
     bool public randomNumberRequested;
-    bool public randomNumberLoaded;
 
     // Player Content
     address payable[] public players;
@@ -160,6 +159,7 @@ contract Raffle is Ownable {
     function requestRandomNumber(
         uint8 _rngCount
     ) public nftHeld enoughTickets vrfCalled {
+        _rngCount = 1;
         supraRouter.generateRequest("disbursement(uint256, uint256[])", 1, 1);
         randomNumberRequested = true;
     }
@@ -174,6 +174,10 @@ contract Raffle is Ownable {
 
         if (address(this).balance == 0) {
             revert NoBalance();
+        }
+
+        if (randomNumberRequested == false) {
+            revert RaffleOngoing();
         }
         randomNumber = _rngList[0];
         winner = players[randomNumber % players.length];
